@@ -1,8 +1,18 @@
-//1. Initialize `truffle-hdwallet-provider`
-HDWalletProvider = require("truffle-hdwallet-provider");
-const LoomTruffleProvider = require('loom-truffle-provider');
+// Initialize HDWalletProvider
+const HDWalletProvider = require("truffle-hdwallet-provider");
+
+const { readFileSync } = require('fs')
+const path = require('path')
+const { join } = require('path')
+
+
 // Set your own mnemonic here
 const mnemonic = "YOUR_MNEMONIC";
+
+function getLoomProviderWithPrivateKey (privateKeyPath, chainId, writeUrl, readUrl) {
+  const privateKey = readFileSync(privateKeyPath, 'utf-8');
+  return new LoomTruffleProvider(chainId, writeUrl, readUrl, privateKey);
+}
 
 // Module exports to make this configuration available to Truffle itself
 module.exports = {
@@ -11,7 +21,7 @@ module.exports = {
     // Configuration for mainnet
     mainnet: {
       provider: function () {
-        // Setting the provider with the Infura Mainnet address and Token
+        // Setting the provider with the Infura Rinkeby address and Token
         return new HDWalletProvider(mnemonic, "https://mainnet.infura.io/v3/YOUR_TOKEN")
       },
       network_id: "1"
@@ -23,17 +33,20 @@ module.exports = {
         // Setting the provider with the Infura Rinkeby address and Token
         return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/YOUR_TOKEN")
       },
+      // Network id is 4 for Rinkeby
       network_id: 4
     },
-     loom_testnet: {
-  provider: function() {
-    const privateKey = 'YOUR_PRIVATE_KEY'
-    const chainId = 'extdev-plasma-us1';
-    const writeUrl = 'http://extdev-plasma-us1.dappchains.com:80/rpc';
-    const readUrl = 'http://extdev-plasma-us1.dappchains.com:80/query';
-    return new LoomTruffleProvider(chainId, writeUrl, readUrl, privateKey);
-    },
-  network_id: '9545242630824'
-}
+
+    basechain: {
+      provider: function() {
+        const chainId = 'default';
+        const writeUrl = 'http://basechain.dappchains.com/rpc';
+        const readUrl = 'http://basechain.dappchains.com/query';
+        const privateKeyPath = path.join(__dirname, 'mainnet_private_key');
+        const loomTruffleProvider = getLoomProviderWithPrivateKey(privateKeyPath, chainId, writeUrl, readUrl);
+        return loomTruffleProvider;
+        },
+      network_id: '*'
+    }
   }
 };

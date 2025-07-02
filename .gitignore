@@ -1,0 +1,3 @@
+./loom genkey -a mainnet_public_key -k mainnet_private_key
+local address: 0x07419790A773Cc6a2840f1c092240922B61eC778
+local address base64: B0GXkKdzzGooQPHAkiQJIrYex3g=mainnet_private_key
